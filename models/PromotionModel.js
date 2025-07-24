@@ -40,6 +40,7 @@ const Promotion = db.define('promotions', {
     allowNull: true
   },
   status: {
+    // PostgreSQL uses ENUM differently, this is handled by Sequelize
     type: DataTypes.ENUM('active', 'inactive', 'expired'),
     defaultValue: 'active',
     allowNull: false

@@ -1,4 +1,3 @@
-// PackageModel.js
 import { DataTypes } from 'sequelize';
 import db from '../config/database.js';
 
@@ -26,6 +25,7 @@ const Package = db.define('packages', {
     }
   },
   price: {
+    // PostgreSQL uses numeric instead of decimal, but Sequelize handles this automatically
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
     validate: {
@@ -58,4 +58,3 @@ const Package = db.define('packages', {
 });
 
 export default Package;
-//package

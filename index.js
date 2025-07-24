@@ -1,4 +1,4 @@
-// index.js (updated with new import and route)
+// index.js - Updated for PostgreSQL
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -44,12 +44,12 @@ app.use('/api/site-settings', SiteSettingRoute);
 (async () => {
   try {
     await db.authenticate();
-    console.log('Database connected...');
-    
-    // Sync database (in development only)
+    console.log('PostgreSQL database connected...');
+
     if (process.env.NODE_ENV !== 'production') {
-      await db.sync();
-      console.log('Database synchronized');
+      // Force: true will drop tables, use with caution
+      await db.sync({ alter: true });
+      console.log('Database models synchronized');
     }
     
     // Initialize promotion scheduler
