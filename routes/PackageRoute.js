@@ -8,14 +8,14 @@ import {
   deletePackage 
 } from '../controllers/PackageController.js';
 import { verifyToken } from '../middleware/AuthMiddleware.js';
-import { uploadImage } from '../middleware/FileUpload.js';
+import { packageUpload } from '../middleware/CloudinaryUpload.js';
 
 const router = express.Router();
 
 router.get('/', getPackages);
 router.get('/:id', getPackage);
-router.post('/', verifyToken, uploadImage.single('image'), createPackage);
-router.put('/:id', verifyToken, uploadImage.single('image'), updatePackage);
+router.post('/', verifyToken, packageUpload, createPackage);
+router.put('/:id', verifyToken, packageUpload, updatePackage);
 router.delete('/:id', verifyToken, deletePackage);
 
 export default router;

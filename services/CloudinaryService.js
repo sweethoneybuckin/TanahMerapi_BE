@@ -1,46 +1,3 @@
-// config/cloudinary.js
-import cloudinary from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import multer from 'multer';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-// Configure Cloudinary
-cloudinary.v2.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-// Setup storage
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary.v2,
-  params: {
-    folder: 'tanah-merapi',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-    transformation: [{ width: 1000, height: 1000, crop: 'limit' }]
-  }
-});
-
-// Create multer upload middleware
-const uploadCloud = multer({ storage: storage });
-
-export { cloudinary, uploadCloud };
-
-// middleware/CloudinaryUpload.js
-import { uploadCloud } from '../config/cloudinary.js';
-
-// Export middleware for different upload types
-export const singleUpload = uploadCloud.single('image');
-export const multipleUpload = uploadCloud.array('images', 5);
-export const menuItemUpload = uploadCloud.single('image');
-export const packageUpload = uploadCloud.single('image');
-export const promotionUpload = uploadCloud.single('image');
-export const slideUpload = uploadCloud.single('image');
-export const settingUpload = uploadCloud.single('image');
-export const fileUpload = uploadCloud.single('file');
-
 // services/CloudinaryService.js
 import { cloudinary } from '../config/cloudinary.js';
 
@@ -97,5 +54,42 @@ export const uploadToCloudinary = async (filePath) => {
   } catch (error) {
     console.error('Error uploading to Cloudinary:', error);
     throw error;
+  }
+};
+
+// Optimize image with transformation
+export const optimizeImage = (url, options = {}) => {
+  if (!url || !url.includes('cloudinary.com')) {
+    return url;
+  }
+  
+  try {
+    // Default transformations
+    const defaultOptions = {
+      width: options.width || 800,
+      height: options.height || 800,
+      crop: options.crop || 'limit',
+      quality: options.quality || 'auto',
+      format: options.format || 'auto'
+    };
+    
+    // Split URL to insert transformations
+    const parts = url.split('/upload/');
+    if (parts.length !== 2) return url;
+    
+    // Build transformation string
+    const transformations = [
+      `w_${defaultOptions.width}`,
+      `h_${defaultOptions.height}`,
+      `c_${defaultOptions.crop}`,
+      `q_${defaultOptions.quality}`,
+      `f_${defaultOptions.format}`
+    ].join(',');
+    
+    // Return URL with transformations
+    return `${parts[0]}/upload/${transformations}/${parts[1]}`;
+  } catch (error) {
+    console.error('Error optimizing image:', error);
+    return url;
   }
 };

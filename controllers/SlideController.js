@@ -1,6 +1,5 @@
 import Slide from '../models/SlideModel.js';
-import fs from 'fs';
-import path from 'path';
+import { deleteCloudinaryImage } from '../services/CloudinaryService.js';
 
 // Get all slides
 export const getSlides = async (req, res) => {
@@ -24,7 +23,8 @@ export const createSlide = async (req, res) => {
       return res.status(400).json({ message: 'Image is required' });
     }
     
-    const image_url = `/uploads/${req.file.filename}`;
+    // Cloudinary upload is handled by middleware
+    const image_url = req.file.path;
     
     const slide = await Slide.create({
       title,
@@ -54,16 +54,13 @@ export const updateSlide = async (req, res) => {
     
     // If new image is uploaded
     if (req.file) {
-      // Delete old image if it exists
+      // Delete old image from Cloudinary if it exists
       if (slide.image_url) {
-        const oldImagePath = path.join(process.cwd(), 'public', slide.image_url);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
-        }
+        await deleteCloudinaryImage(slide.image_url);
       }
       
-      // Set new image URL
-      image_url = `/uploads/${req.file.filename}`;
+      // Set new image URL from Cloudinary
+      image_url = req.file.path;
     }
     
     // Update slide
@@ -90,12 +87,9 @@ export const deleteSlide = async (req, res) => {
       return res.status(404).json({ message: 'Slide not found' });
     }
     
-    // Delete image file if it exists
+    // Delete image from Cloudinary if it exists
     if (slide.image_url) {
-      const imagePath = path.join(process.cwd(), 'public', slide.image_url);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+      await deleteCloudinaryImage(slide.image_url);
     }
     
     // Delete slide from database

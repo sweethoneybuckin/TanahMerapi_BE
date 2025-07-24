@@ -1,3 +1,4 @@
+// PromotionRoute.js
 import express from 'express';
 import { 
   getPromotions, 
@@ -7,14 +8,14 @@ import {
   deletePromotion 
 } from '../controllers/PromotionController.js';
 import { verifyToken } from '../middleware/AuthMiddleware.js';
-import { uploadImage } from '../middleware/FileUpload.js';
+import { promotionUpload } from '../middleware/CloudinaryUpload.js';
 
 const router = express.Router();
 
 router.get('/', getPromotions);
 router.get('/:id', getPromotion);
-router.post('/', verifyToken, uploadImage.single('image'), createPromotion);
-router.put('/:id', verifyToken, uploadImage.single('image'), updatePromotion);
+router.post('/', verifyToken, promotionUpload, createPromotion);
+router.put('/:id', verifyToken, promotionUpload, updatePromotion);
 router.delete('/:id', verifyToken, deletePromotion);
 
 export default router;

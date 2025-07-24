@@ -1,6 +1,5 @@
 import MenuItem from '../models/MenuItemModel.js';
-import fs from 'fs';
-import path from 'path';
+import { deleteCloudinaryImage } from '../services/CloudinaryService.js';
 
 // Get all menu items
 export const getMenuItems = async (req, res) => {
@@ -39,7 +38,8 @@ export const createMenuItem = async (req, res) => {
       return res.status(400).json({ message: 'Image is required' });
     }
     
-    const image_url = `/uploads/${req.file.filename}`;
+    // Cloudinary upload is handled by middleware
+    const image_url = req.file.path;
     
     const menuItem = await MenuItem.create({
       name,
@@ -70,16 +70,13 @@ export const updateMenuItem = async (req, res) => {
     
     // If new image is uploaded
     if (req.file) {
-      // Delete old image if it exists
+      // Delete old image from Cloudinary if it exists
       if (menuItem.image_url) {
-        const oldImagePath = path.join(process.cwd(), 'public', menuItem.image_url);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
-        }
+        await deleteCloudinaryImage(menuItem.image_url);
       }
       
-      // Set new image URL
-      image_url = `/uploads/${req.file.filename}`;
+      // Set new image URL from Cloudinary
+      image_url = req.file.path;
     }
     
     // Update menu item
@@ -107,12 +104,9 @@ export const deleteMenuItem = async (req, res) => {
       return res.status(404).json({ message: 'Menu item not found' });
     }
     
-    // Delete image file if it exists
+    // Delete image from Cloudinary if it exists
     if (menuItem.image_url) {
-      const imagePath = path.join(process.cwd(), 'public', menuItem.image_url);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+      await deleteCloudinaryImage(menuItem.image_url);
     }
     
     // Delete menu item from database

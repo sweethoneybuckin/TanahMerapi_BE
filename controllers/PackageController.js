@@ -1,7 +1,6 @@
 // PackageController.js
 import Package from '../models/PackageModel.js';
-import fs from 'fs';
-import path from 'path';
+import { deleteCloudinaryImage } from '../services/CloudinaryService.js';
 
 // Get all packages
 export const getPackages = async (req, res) => {
@@ -41,7 +40,8 @@ export const createPackage = async (req, res) => {
       return res.status(400).json({ message: 'Image is required' });
     }
     
-    const image_url = `/uploads/${req.file.filename}`;
+    // Cloudinary upload is handled by middleware
+    const image_url = req.file.path;
     
     // Create package
     const packageData = await Package.create({
@@ -74,16 +74,13 @@ export const updatePackage = async (req, res) => {
     
     // If new image is uploaded
     if (req.file) {
-      // Delete old image if it exists
+      // Delete old image from Cloudinary if it exists
       if (packageData.image_url) {
-        const oldImagePath = path.join(process.cwd(), 'public', packageData.image_url);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
-        }
+        await deleteCloudinaryImage(packageData.image_url);
       }
       
-      // Set new image URL
-      image_url = `/uploads/${req.file.filename}`;
+      // Set new image URL from Cloudinary
+      image_url = req.file.path;
     }
     
     // Update package
@@ -112,12 +109,9 @@ export const deletePackage = async (req, res) => {
       return res.status(404).json({ message: 'Package not found' });
     }
     
-    // Delete image file if it exists
+    // Delete image from Cloudinary if it exists
     if (packageData.image_url) {
-      const imagePath = path.join(process.cwd(), 'public', packageData.image_url);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+      await deleteCloudinaryImage(packageData.image_url);
     }
     
     // Delete package from database

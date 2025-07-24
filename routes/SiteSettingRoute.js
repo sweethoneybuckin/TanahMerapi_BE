@@ -6,12 +6,12 @@ import {
   updateSiteSetting 
 } from '../controllers/SiteSettingController.js';
 import { verifyToken } from '../middleware/AuthMiddleware.js';
-import { uploadImage } from '../middleware/FileUpload.js';
+import { settingUpload } from '../middleware/CloudinaryUpload.js';
 
 const router = express.Router();
 
 router.get('/', getSiteSettings);
 router.get('/:key', getSiteSettingByKey);
-router.put('/:key', verifyToken, uploadImage.single('image'), updateSiteSetting);
+router.put('/:key', verifyToken, settingUpload, updateSiteSetting);
 
 export default router;

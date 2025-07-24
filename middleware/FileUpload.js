@@ -1,3 +1,6 @@
+// middleware/FileUpload.js
+// We're keeping this file for backward compatibility but you can 
+// gradually phase it out as you migrate to Cloudinary
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';

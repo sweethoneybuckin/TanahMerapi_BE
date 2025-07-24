@@ -4,6 +4,7 @@ import Package from '../models/PackageModel.js';
 import PromotionPackage from '../models/PromotionPackageModel.js';
 import { Op } from 'sequelize';
 import db from '../config/database.js';
+import { deleteCloudinaryImage } from '../services/CloudinaryService.js';
 
 export const applyPromotionToPackages = async (promotion, packageIds) => {
   const transaction = await db.transaction();
@@ -126,5 +127,23 @@ export const getFirstPackageImage = async (packageIds) => {
   } catch (error) {
     console.error('Error getting package image:', error);
     return null;
+  }
+};
+
+// New function to cleanup Cloudinary images when promotion is deleted
+export const cleanupPromotionImages = async (promotionId) => {
+  try {
+    const promotion = await Promotion.findByPk(promotionId);
+    
+    if (promotion && promotion.image_url && promotion.image_url.includes('cloudinary')) {
+      // Delete the promotion image from Cloudinary
+      await deleteCloudinaryImage(promotion.image_url);
+      console.log(`Deleted promotion image for ID: ${promotionId}`);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error cleaning up promotion images:', error);
+    throw error;
   }
 };

@@ -1,3 +1,4 @@
+// SlideRoute.js
 import express from 'express';
 import { 
   getSlides, 
@@ -6,13 +7,13 @@ import {
   deleteSlide 
 } from '../controllers/SlideController.js';
 import { verifyToken } from '../middleware/AuthMiddleware.js';
-import { uploadImage } from '../middleware/FileUpload.js';
+import { slideUpload } from '../middleware/CloudinaryUpload.js';
 
 const router = express.Router();
 
 router.get('/', getSlides);
-router.post('/', verifyToken, uploadImage.single('image'), createSlide);
-router.put('/:id', verifyToken, uploadImage.single('image'), updateSlide);
+router.post('/', verifyToken, slideUpload, createSlide);
+router.put('/:id', verifyToken, slideUpload, updateSlide);
 router.delete('/:id', verifyToken, deleteSlide);
 
 export default router;
